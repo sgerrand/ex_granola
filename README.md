@@ -4,6 +4,7 @@ Elixir client for the [Granola API](https://docs.granola.ai/introduction).
 
 ## Installation
 
+<!-- x-release-please-start-version -->
 ```elixir
 def deps do
   [
@@ -11,6 +12,7 @@ def deps do
   ]
 end
 ```
+<!-- x-release-please-end -->
 
 ## Usage
 
