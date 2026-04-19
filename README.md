@@ -1,4 +1,4 @@
-# ex_granola
+# Granola
 
 Elixir client for the [Granola API](https://docs.granola.ai/introduction).
 
