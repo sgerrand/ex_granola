@@ -1,0 +1,31 @@
+{
+  "id": "not_1d3tmYTlCICgjy",
+  "object": "note",
+  "title": "Quarterly yoghurt budget review",
+  "owner": {
+    "name": "Oat Benson",
+    "email": "oat@granola.ai"
+  },
+  "created_at": "2026-01-27T15:30:00Z",
+  "updated_at": "2026-01-27T16:45:00Z",
+  "web_url": "https://notes.granola.ai/d/f3e45e0f-24cc-480b-9a6c-8b1f5e3d7a2c",
+  "calendar_event": null,
+  "attendees": [],
+  "folder_membership": [],
+  "summary_text": "The quarterly yoghurt budget review was a success.",
+  "summary_markdown": null,
+  "transcript": [
+    {
+      "speaker": {"source": "microphone"},
+      "text": "Let's get started.",
+      "start_time": "2026-01-27T15:00:01Z",
+      "end_time": "2026-01-27T15:00:04Z"
+    },
+    {
+      "speaker": {"source": "speaker"},
+      "text": "Sounds good.",
+      "start_time": "2026-01-27T15:00:05Z",
+      "end_time": "2026-01-27T15:00:07Z"
+    }
+  ]
+}
