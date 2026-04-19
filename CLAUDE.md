@@ -20,6 +20,7 @@ Elixir HTTP client library for the [Granola API](https://docs.granola.ai/introdu
 **Entry point:** `Granola.new/1` returns a `%Granola.Client{}` containing a configured `Req.Request`. All public API functions accept this struct as their first argument.
 
 **Module layout:**
+
 - `lib/granola.ex` — `new/1` entry point, delegates to `Granola.Client`
 - `lib/granola/client.ex` — `%Granola.Client{}` struct; wraps `Req.new/1` with base URL, bearer auth, and atom-key JSON decoding
 - `lib/granola/notes.ex` — `list/2`, `get/3`, `stream/2`
@@ -29,6 +30,7 @@ Elixir HTTP client library for the [Granola API](https://docs.granola.ai/introdu
 **Testing:** Tests use `Req.Test` stubs (no real HTTP). Pass `plug: {Req.Test, __MODULE__}` in `Granola.new/1` to wire the stub. JSON fixtures live in `test/support/fixtures/`.
 
 **API summary:**
+
 - `GET /v1/notes` — list notes with optional `created_before`, `created_after`, `updated_after`, `cursor`, `page_size` filters
 - `GET /v1/notes/{note_id}` — get a single note; pass `include: :transcript` for full transcript
 - `stream/2` — lazy `Stream` that auto-paginates via cursor
