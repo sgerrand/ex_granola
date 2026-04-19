@@ -1,5 +1,9 @@
 defmodule Granola.Client do
-  @moduledoc false
+  @moduledoc """
+  Holds configuration for the Granola API client.
+
+  Create one with `Granola.new/1` and pass it to functions in `Granola.Notes`.
+  """
 
   @base_url "https://public-api.granola.ai/v1"
 
