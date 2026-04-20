@@ -1,5 +1,10 @@
 # Granola
 
+[![Test Status](https://github.com/sgerrand/ex_granola/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/sgerrand/ex_granola/actions/workflows/ci.yml)
+[![Coverage Status](https://coveralls.io/repos/github/sgerrand/ex_granola/badge.svg?branch=main)](https://coveralls.io/github/sgerrand/ex_granola?branch=main)
+[![Hex Version](https://img.shields.io/hexpm/v/granola.svg)](https://hex.pm/packages/granola)
+[![Hex Docs](https://img.shields.io/badge/docs-hexpm-blue.svg)](https://hexdocs.pm/granola/)
+
 Elixir client for the [Granola API](https://docs.granola.ai/introduction).
 
 ## Installation
