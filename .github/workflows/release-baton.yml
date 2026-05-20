@@ -1,4 +1,4 @@
-name: Release Please
+name: Release Baton
 
 on:
   push:
@@ -10,11 +10,12 @@ permissions:
   pull-requests: write
 
 jobs:
-  release-please:
+  release-baton:
     runs-on: ubuntu-latest
     steps:
-      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+      - uses: release-baton/release-baton@71f10a09c0b5161420efe386fdfa657f9f7d5688 # v1.1.1
         with:
+          client-id: ${{ secrets.RELEASE_BATON_CLIENT_ID }}
+          app-private-key: ${{ secrets.RELEASE_BATON_PRIVATE_KEY }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
-          token: ${{ secrets.RELEASE_PLEASE_PAT }}
