@@ -17,6 +17,7 @@ def deps do
   ]
 end
 ```
+
 <!-- x-release-please-end -->
 
 ## Usage
