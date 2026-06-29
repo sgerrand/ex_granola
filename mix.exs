@@ -2,7 +2,7 @@ defmodule Granola.MixProject do
   use Mix.Project
 
   @repo_url "https://github.com/sgerrand/ex_granola"
-  @version "1.0.1"
+  @version "1.0.2"
 
   def project do
     [
