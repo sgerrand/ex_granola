@@ -14,7 +14,7 @@ Elixir client for the [Granola API](https://docs.granola.ai/introduction).
 ```elixir
 def deps do
   [
-    {:granola, "~> 1.0.2"}
+    {:granola, "~> 1.0.3"}
   ]
 end
 ```
