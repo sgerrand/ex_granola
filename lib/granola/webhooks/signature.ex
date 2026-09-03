@@ -58,6 +58,10 @@ defmodule Granola.Webhooks.Signature do
   Returns `:ok` when the signature matches and the timestamp is within
   tolerance, otherwise `{:error, reason}`.
 
+  A secret that is not base64, or that decodes to nothing (`""` or a bare
+  `"whsec_"`), is rejected with `{:error, :invalid_signing_secret}` rather than
+  used as an empty HMAC key.
+
   ## Options
 
     * `:tolerance` - how many seconds the `webhook-timestamp` may differ from
@@ -114,7 +118,8 @@ defmodule Granola.Webhooks.Signature do
   @spec sign(binary(), binary(), binary() | integer(), binary()) ::
           {:ok, binary()} | {:error, :invalid_signing_secret}
   def sign(raw_body, id, timestamp, signing_secret)
-      when is_binary(raw_body) and is_binary(id) and is_binary(signing_secret) do
+      when is_binary(raw_body) and is_binary(id) and is_binary(signing_secret) and
+             (is_binary(timestamp) or is_integer(timestamp)) do
     with {:ok, key} <- decode_secret(signing_secret) do
       {:ok, @version <> "," <> mac(key, id, to_string(timestamp), raw_body)}
     end
@@ -142,12 +147,21 @@ defmodule Granola.Webhooks.Signature do
 
   defp secure_compare(_left, _right), do: false
 
+  # An empty key is rejected rather than used. HMAC accepts one and returns a
+  # perfectly valid signature, so a secret of "" or "whsec_" would verify
+  # deliveries that anyone could forge.
   defp decode_secret(signing_secret) do
     stripped = String.replace_prefix(signing_secret, @secret_prefix, "")
 
-    with :error <- Base.decode64(stripped),
-         :error <- Base.decode64(stripped, padding: false) do
-      {:error, :invalid_signing_secret}
+    case decode64(stripped) do
+      {:ok, key} when byte_size(key) > 0 -> {:ok, key}
+      _other -> {:error, :invalid_signing_secret}
+    end
+  end
+
+  defp decode64(value) do
+    with :error <- Base.decode64(value) do
+      Base.decode64(value, padding: false)
     end
   end
 

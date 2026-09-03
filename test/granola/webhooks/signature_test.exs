@@ -145,6 +145,25 @@ defmodule Granola.Webhooks.SignatureTest do
                {:error, :invalid_signing_secret}
     end
 
+    test "rejects a secret that decodes to an empty key" do
+      for secret <- ["", "whsec_"] do
+        assert Signature.verify(@body, headers(), secret, now: @timestamp) ==
+                 {:error, :invalid_signing_secret}
+      end
+    end
+
+    test "does not accept a delivery signed with an empty key" do
+      # HMAC happily takes a zero-length key, and that key is public knowledge,
+      # so anyone could forge this signature against a misconfigured endpoint.
+      forged =
+        "v1," <>
+          Base.encode64(:crypto.mac(:hmac, :sha256, "", "#{@id}.#{@timestamp}.#{@body}"))
+
+      assert Signature.verify(@body, headers(%{"webhook-signature" => forged}), "whsec_",
+               now: @timestamp
+             ) == {:error, :invalid_signing_secret}
+    end
+
     test "defaults to the current system time" do
       now = System.system_time(:second)
       {:ok, signature} = Signature.sign(@body, @id, now, @secret)
@@ -174,6 +193,19 @@ defmodule Granola.Webhooks.SignatureTest do
     test "returns an error for an unusable secret" do
       assert Signature.sign(@body, @id, @timestamp, "whsec_not base64!") ==
                {:error, :invalid_signing_secret}
+    end
+
+    test "returns an error for a secret that decodes to an empty key" do
+      assert Signature.sign(@body, @id, @timestamp, "whsec_") ==
+               {:error, :invalid_signing_secret}
+    end
+
+    test "raises rather than stringifying a timestamp of the wrong type" do
+      for timestamp <- [:foo, 1.5, nil] do
+        assert_raise FunctionClauseError, fn ->
+          Signature.sign(@body, @id, timestamp, @secret)
+        end
+      end
     end
   end
 end
