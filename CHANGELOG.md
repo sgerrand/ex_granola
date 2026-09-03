@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.4](https://github.com/sgerrand/ex_granola/compare/v1.0.3...v1.0.4) (2026-09-03)
+
+
+### Bug Fixes
+
+* **deps:** bump req from 0.6.3 to 0.7.2 ([#28](https://github.com/sgerrand/ex_granola/issues/28)) ([9339e15](https://github.com/sgerrand/ex_granola/commit/9339e153754b339987b399f0993ab98a793fe8aa))
+* **deps:** bump req from 0.7.2 to 0.7.3 ([#30](https://github.com/sgerrand/ex_granola/issues/30)) ([e9b3fc2](https://github.com/sgerrand/ex_granola/commit/e9b3fc2747c00e569cee9d3ee4465ce674de608d))
+
 ## [1.0.3](https://github.com/sgerrand/ex_granola/compare/v1.0.2...v1.0.3) (2026-08-04)
 
 
