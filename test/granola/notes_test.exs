@@ -125,6 +125,19 @@ defmodule Granola.NotesTest do
       assert Enum.map(notes, & &1.id) == ["not_aaaaaaaaaaaaaa", "not_bbbbbbbbbbbbbb"]
     end
 
+    test "stops when hasMore is true but no cursor is returned", %{client: client} do
+      Req.Test.stub(__MODULE__, fn conn ->
+        Req.Test.json(conn, %{
+          "notes" => [%{"id" => "not_aaaaaaaaaaaaaa", "object" => "note", "title" => "Only"}],
+          "hasMore" => true,
+          "cursor" => nil
+        })
+      end)
+
+      assert [%{id: "not_aaaaaaaaaaaaaa"}] =
+               Granola.Notes.stream(client) |> Enum.to_list()
+    end
+
     test "raises on transport error during iteration", %{client: client} do
       Req.Test.stub(__MODULE__, fn conn ->
         Req.Test.transport_error(conn, :econnrefused)
