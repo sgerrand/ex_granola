@@ -7,8 +7,20 @@ defmodule Granola.Audit do
   is read-only and cannot reach notes, folders, spaces or webhooks, so a key made
   under **Settings → API** will not work here.
 
-      client = Granola.new(api_key: "grn_YOUR_AUDIT_API_KEY")
+      client = Granola.new(api_key: "grn_YOUR_AUDIT_API_KEY", keys: :strings)
       {:ok, result} = Granola.Audit.list(client, action: "workspace")
+
+  ## Decode audit events with string keys
+
+  Build the audit client with `keys: :strings`. The default of `:atoms` turns
+  every JSON key in the response into an atom, and atoms are never garbage
+  collected. Audit events are the worst case for that: the action set is open,
+  each action carries its own `data` fields, and Granola adds more over time, so
+  a long-running collector keeps minting atoms it can never reclaim. Enough of
+  them and the VM hits the atom table limit and stops.
+
+  `list/2` and `stream/2` work with either setting — they return whatever the
+  client decoded.
 
   ## Reading events correctly
 
@@ -52,9 +64,9 @@ defmodule Granola.Audit do
 
   ## Examples
 
-      iex> client = Granola.new(api_key: "grn_xxx")
+      iex> client = Granola.new(api_key: "grn_xxx", keys: :strings)
       iex> Granola.Audit.list(client, action: "workspace", page_size: 10)
-      {:ok, %{events: [...], hasMore: true, cursor: "eyJ..."}}
+      {:ok, %{"events" => [...], "hasMore" => true, "cursor" => "eyJ..."}}
 
   """
   @spec list(Client.t(), keyword()) :: {:ok, map()} | {:error, term()}
@@ -80,9 +92,9 @@ defmodule Granola.Audit do
 
   ## Examples
 
-      iex> client = Granola.new(api_key: "grn_xxx")
+      iex> client = Granola.new(api_key: "grn_xxx", keys: :strings)
       iex> Granola.Audit.stream(client, action: "auth") |> Enum.take(3)
-      [%{id: "aud_...", action: "auth.login", ...}, ...]
+      [%{"id" => "aud_...", "action" => "auth.login", ...}, ...]
 
   """
   @spec stream(Client.t(), keyword()) :: Enumerable.t()

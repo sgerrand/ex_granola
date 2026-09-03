@@ -12,6 +12,9 @@ defmodule Granola.Paginator do
   called with a keyword list containing `:cursor` (absent on the first page)
   and must return the same shape as a `list/2` function.
 
+  Reads envelopes decoded with either atom or string keys, so it works whichever
+  `:keys` the client was built with.
+
   Mirrors the error handling of the list functions by throwing the
   `{:error, reason}` tuple, since a `Stream` cannot return one.
   """
@@ -27,18 +30,34 @@ defmodule Granola.Paginator do
           page_opts = if cursor, do: [cursor: cursor], else: []
 
           case fetch.(page_opts) do
-            {:ok, %{^key => items, hasMore: true, cursor: next_cursor}}
-            when not is_nil(next_cursor) ->
-              {items, next_cursor}
-
-            {:ok, %{^key => items}} ->
-              {items, :done}
-
-            {:error, _} = err ->
-              throw(err)
+            {:ok, page} -> next_page(page, key)
+            {:error, _} = err -> throw(err)
           end
       end,
       fn _ -> :ok end
     )
+  end
+
+  defp next_page(page, key) do
+    items = fetch!(page, key)
+
+    case {get(page, :hasMore), get(page, :cursor)} do
+      {true, next_cursor} when is_binary(next_cursor) -> {items, next_cursor}
+      _ -> {items, :done}
+    end
+  end
+
+  defp fetch!(page, key) do
+    case get(page, key) do
+      nil -> raise KeyError, key: key, term: page
+      items -> items
+    end
+  end
+
+  defp get(page, key) do
+    case Map.fetch(page, key) do
+      {:ok, value} -> value
+      :error -> Map.get(page, Atom.to_string(key))
+    end
   end
 end

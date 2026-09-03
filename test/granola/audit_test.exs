@@ -2,7 +2,7 @@ defmodule Granola.AuditTest do
   use ExUnit.Case, async: true
 
   setup do
-    client = Granola.new(api_key: "grn_test_key", plug: {Req.Test, __MODULE__})
+    client = Granola.new(api_key: "grn_test_key", keys: :strings, plug: {Req.Test, __MODULE__})
     %{client: client}
   end
 
@@ -19,14 +19,42 @@ defmodule Granola.AuditTest do
       end)
 
       assert {:ok, result} = Granola.Audit.list(client)
+      assert [event] = result["events"]
+      assert event["id"] == "aud_7Kq2mXbT9vRp3L"
+      assert event["action"] == "workspace.member_added"
+      assert event["actor"]["email"] == "oat@granola.ai"
+      assert event["data"]["role"] == "member"
+      assert event["context"]["client_version"] == "7.400.0"
+      assert result["hasMore"] == false
+      assert result["cursor"] == nil
+    end
+
+    test "does not create atoms for unknown event fields", %{client: client} do
+      Req.Test.stub(__MODULE__, fn conn ->
+        Req.Test.json(conn, %{
+          "events" => [%{"data" => %{"an_action_specific_field_granola_added_later" => 1}}],
+          "hasMore" => false,
+          "cursor" => nil
+        })
+      end)
+
+      assert {:ok, _} = Granola.Audit.list(client)
+
+      assert_raise ArgumentError, fn ->
+        String.to_existing_atom("an_action_specific_field_granola_added_later")
+      end
+    end
+
+    test "returns atom keys when the client asks for them" do
+      client = Granola.new(api_key: "grn_test_key", plug: {Req.Test, __MODULE__})
+
+      Req.Test.stub(__MODULE__, fn conn ->
+        Req.Test.json(conn, Jason.decode!(fixture("list_audit_events.json")))
+      end)
+
+      assert {:ok, result} = Granola.Audit.list(client)
       assert [event] = result.events
       assert event.id == "aud_7Kq2mXbT9vRp3L"
-      assert event.action == "workspace.member_added"
-      assert event.actor.email == "oat@granola.ai"
-      assert event.data.role == "member"
-      assert event.context.client_version == "7.400.0"
-      assert result.hasMore == false
-      assert result.cursor == nil
     end
 
     test "passes query params", %{client: client} do
@@ -98,6 +126,29 @@ defmodule Granola.AuditTest do
       end)
 
       events = Granola.Audit.stream(client) |> Enum.to_list()
+      assert Enum.map(events, & &1["id"]) == ["aud_aaaaaaaaaaaaaa", "aud_bbbbbbbbbbbbbb"]
+    end
+
+    test "pages envelopes decoded with atom keys" do
+      client = Granola.new(api_key: "grn_test_key", plug: {Req.Test, __MODULE__})
+
+      Req.Test.stub(__MODULE__, fn conn ->
+        if conn.query_string =~ "cursor=cursor_abc" do
+          Req.Test.json(conn, %{
+            "events" => [%{"id" => "aud_bbbbbbbbbbbbbb"}],
+            "hasMore" => false,
+            "cursor" => nil
+          })
+        else
+          Req.Test.json(conn, %{
+            "events" => [%{"id" => "aud_aaaaaaaaaaaaaa"}],
+            "hasMore" => true,
+            "cursor" => "cursor_abc"
+          })
+        end
+      end)
+
+      events = Granola.Audit.stream(client) |> Enum.to_list()
       assert Enum.map(events, & &1.id) == ["aud_aaaaaaaaaaaaaa", "aud_bbbbbbbbbbbbbb"]
     end
 
@@ -116,7 +167,7 @@ defmodule Granola.AuditTest do
         end
       end)
 
-      assert [%{id: "aud_aaaaaaaaaaaaaa"}] =
+      assert [%{"id" => "aud_aaaaaaaaaaaaaa"}] =
                Granola.Audit.stream(client, action: "auth") |> Enum.to_list()
     end
 
@@ -129,7 +180,7 @@ defmodule Granola.AuditTest do
         })
       end)
 
-      assert [%{id: "aud_aaaaaaaaaaaaaa"}] = Granola.Audit.stream(client) |> Enum.to_list()
+      assert [%{"id" => "aud_aaaaaaaaaaaaaa"}] = Granola.Audit.stream(client) |> Enum.to_list()
     end
 
     test "raises on transport error during iteration", %{client: client} do

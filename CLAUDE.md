@@ -22,7 +22,7 @@ Elixir HTTP client library for the [Granola API](https://docs.granola.ai/introdu
 **Module layout:**
 
 - `lib/granola.ex` — `new/1` entry point, delegates to `Granola.Client`
-- `lib/granola/client.ex` — `%Granola.Client{}` struct; wraps `Req.new/1` with base URL, bearer auth, and atom-key JSON decoding via `decoders: [json: &Jason.decode(&1, keys: :atoms)]`
+- `lib/granola/client.ex` — `%Granola.Client{}` struct; wraps `Req.new/1` with base URL, bearer auth, and JSON decoding via `decoders: [json: &Jason.decode(&1, keys: keys)]`, where `keys` comes from the `:keys` option (`:atoms` default, `:strings` for open-ended payloads like audit events — atoms are never garbage collected)
 - `lib/granola/notes.ex` — `list/2`, `get/3`, `stream/2`
 - `lib/granola/audit.ex` — `list/2`, `stream/2` for the workspace audit log (Enterprise, separate API key)
 - `lib/granola/folders.ex` — `list/2`, `stream/1`

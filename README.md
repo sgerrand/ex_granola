@@ -35,6 +35,17 @@ plans).
 The audit log uses a separate key, so create a second client for it. See
 [Audit log](#audit-log).
 
+JSON object keys are decoded as atoms by default. Pass `keys: :strings` to get
+string keys instead:
+
+```elixir
+client = Granola.new(api_key: "grn_YOUR_API_KEY", keys: :strings)
+```
+
+Atoms are never garbage collected, so every new key the API returns is permanent
+for the life of the VM. Use `:strings` for the audit log, and for any
+long-running process reading payloads whose shape you do not control.
+
 ### List notes
 
 ```elixir
@@ -228,27 +239,33 @@ Audit API keys** (max 5 per workspace). An audit key is read-only and cannot
 reach notes, so use a separate client:
 
 ```elixir
-audit = Granola.new(api_key: "grn_YOUR_AUDIT_API_KEY")
+audit = Granola.new(api_key: "grn_YOUR_AUDIT_API_KEY", keys: :strings)
 
 {:ok, result} = Granola.Audit.list(audit, action: "auth", page_size: 30)
 
-result.events   # list of audit events
-result.hasMore  # true if there are more pages
-result.cursor   # pass as :cursor to fetch the next page
+result["events"]   # list of audit events
+result["hasMore"]  # true if there are more pages
+result["cursor"]   # pass as :cursor to fetch the next page
 ```
+
+Use `keys: :strings` here. The default of `:atoms` turns every JSON key in the
+response into an atom, and atoms are never garbage collected. Audit events are
+the worst case: the action list is open, each action carries its own `data`
+fields, and Granola adds more over time, so a collector left running keeps
+creating atoms it can never reclaim until the VM hits its atom limit and stops.
 
 Each event looks like:
 
 ```elixir
 %{
-  id: "aud_7Kq2mXbT9vRp3L",
-  object: "audit_event",
-  action: "workspace.member_added",
-  occurred_at: "2026-01-27T15:30:00.482Z",
-  collected_at: "2026-01-27T15:30:04.109733Z",
-  actor: %{object: "user", id: "usr_3nQ8vLpZ2kR7dY", email: "oat@granola.ai"},
-  data: %{role: "member"},
-  context: %{ip_address: "203.0.113.42", user_agent: "...", client_version: "7.400.0"}
+  "id" => "aud_7Kq2mXbT9vRp3L",
+  "object" => "audit_event",
+  "action" => "workspace.member_added",
+  "occurred_at" => "2026-01-27T15:30:00.482Z",
+  "collected_at" => "2026-01-27T15:30:04.109733Z",
+  "actor" => %{"object" => "user", "id" => "usr_3nQ8vLpZ2kR7dY", "email" => "oat@granola.ai"},
+  "data" => %{"role" => "member"},
+  "context" => %{"ip_address" => "203.0.113.42", "user_agent" => "...", "client_version" => "7.400.0"}
 }
 ```
 
@@ -262,7 +279,7 @@ Stream events the same way as notes:
 
 ```elixir
 Granola.Audit.stream(audit, action: "transcription", occurred_after: ~D[2026-01-01])
-|> Stream.each(&IO.puts(&1.action))
+|> Stream.each(&IO.puts(&1["action"]))
 |> Stream.run()
 ```
 
