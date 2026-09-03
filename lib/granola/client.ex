@@ -20,7 +20,7 @@ defmodule Granola.Client do
         [
           base_url: @base_url,
           auth: {:bearer, api_key},
-          decode_json: [keys: :atoms],
+          decoders: [json: &Jason.decode(&1, keys: :atoms)],
           retry: false
         ] ++ req_opts
       )

@@ -44,7 +44,8 @@ defmodule Granola.MixProject do
 
   defp deps do
     [
-      {:req, "~> 0.5"},
+      {:jason, "~> 1.0"},
+      {:req, "~> 0.7"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:excoveralls, "~> 0.18", only: :test},
