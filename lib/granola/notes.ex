@@ -93,7 +93,8 @@ defmodule Granola.Notes do
           params = if cursor, do: Keyword.put(base_opts, :cursor, cursor), else: base_opts
 
           case list(client, params) do
-            {:ok, %{notes: notes, hasMore: true, cursor: next_cursor}} ->
+            {:ok, %{notes: notes, hasMore: true, cursor: next_cursor}}
+            when is_binary(next_cursor) ->
               {notes, next_cursor}
 
             {:ok, %{notes: notes}} ->
