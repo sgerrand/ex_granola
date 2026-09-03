@@ -55,7 +55,7 @@ defmodule Granola.Webhooks do
 
   ## Examples
 
-      iex> secret = "whsec_" <> Base.encode64("hunter2")
+      iex> secret = "whsec_MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw"
       iex> body = ~s({"event_id":"evt_1","event_type":"note.generated","note_id":"not_1d3tmYTlCICgjy","occurred_at":"2026-01-27T15:30:00Z"})
       iex> {:ok, signature} = Granola.Webhooks.Signature.sign(body, "evt_1", 1_769_527_800, secret)
       iex> headers = [

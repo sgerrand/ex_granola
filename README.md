@@ -137,6 +137,11 @@ endpoint.signing_secret # "whsec_..." — returned once, store it now
 The signing secret is only in this one response. If you lose it, delete the
 endpoint and make a new one.
 
+A secret that isn't valid base64, or that decodes to fewer than 24 bytes, is
+rejected at verification time instead of being used. That covers the case where
+config goes missing and the secret ends up as `""` or a bare `"whsec_"` — HMAC
+would accept a key like that and happily verify forged deliveries.
+
 Options: `:url` (required, HTTPS), `:scopes` (required), `:events` (defaults to
 all of them) and `:folder_ids` (limit deliveries to notes in those folders and
 their subfolders).

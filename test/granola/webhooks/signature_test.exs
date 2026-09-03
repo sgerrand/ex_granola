@@ -78,7 +78,7 @@ defmodule Granola.Webhooks.SignatureTest do
     end
 
     test "rejects a signature made with a different secret" do
-      other = "whsec_" <> Base.encode64("some-other-key")
+      other = "whsec_" <> Base.encode64("some-other-signing-key!!")
       {:ok, signature} = Signature.sign(@body, @id, @timestamp, other)
 
       assert verify(headers(%{"webhook-signature" => signature})) ==
@@ -145,11 +145,16 @@ defmodule Granola.Webhooks.SignatureTest do
                {:error, :invalid_signing_secret}
     end
 
-    test "rejects a secret that decodes to an empty key" do
-      for secret <- ["", "whsec_"] do
+    test "rejects a secret that decodes to fewer than 24 bytes" do
+      for secret <- ["", "whsec_", "whsec_" <> Base.encode64("too-short")] do
         assert Signature.verify(@body, headers(), secret, now: @timestamp) ==
-                 {:error, :invalid_signing_secret}
+                 {:error, :signing_secret_too_short}
       end
+    end
+
+    test "accepts a secret of exactly 24 bytes" do
+      assert byte_size("granola-test-signing-key") == 24
+      assert verify(headers()) == :ok
     end
 
     test "does not accept a delivery signed with an empty key" do
@@ -161,7 +166,7 @@ defmodule Granola.Webhooks.SignatureTest do
 
       assert Signature.verify(@body, headers(%{"webhook-signature" => forged}), "whsec_",
                now: @timestamp
-             ) == {:error, :invalid_signing_secret}
+             ) == {:error, :signing_secret_too_short}
     end
 
     test "defaults to the current system time" do
@@ -195,9 +200,12 @@ defmodule Granola.Webhooks.SignatureTest do
                {:error, :invalid_signing_secret}
     end
 
-    test "returns an error for a secret that decodes to an empty key" do
+    test "returns an error for a secret that decodes to fewer than 24 bytes" do
       assert Signature.sign(@body, @id, @timestamp, "whsec_") ==
-               {:error, :invalid_signing_secret}
+               {:error, :signing_secret_too_short}
+
+      assert Signature.sign(@body, @id, @timestamp, "whsec_" <> Base.encode64("too-short")) ==
+               {:error, :signing_secret_too_short}
     end
 
     test "raises rather than stringifying a timestamp of the wrong type" do

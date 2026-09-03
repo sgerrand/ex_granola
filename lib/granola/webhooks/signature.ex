@@ -34,6 +34,10 @@ defmodule Granola.Webhooks.Signature do
   @version "v1"
   @default_tolerance 300
 
+  # Standard Webhooks requires at least 24 bytes of key material. Anything
+  # shorter is a misconfiguration, not a secret worth trusting.
+  @min_secret_bytes 24
+
   @typedoc """
   Request headers, as a map or a list of `{name, value}` pairs.
 
@@ -50,6 +54,7 @@ defmodule Granola.Webhooks.Signature do
           | :timestamp_too_old
           | :timestamp_in_future
           | :invalid_signing_secret
+          | :signing_secret_too_short
           | :no_matching_signature
 
   @doc """
@@ -58,9 +63,10 @@ defmodule Granola.Webhooks.Signature do
   Returns `:ok` when the signature matches and the timestamp is within
   tolerance, otherwise `{:error, reason}`.
 
-  A secret that is not base64, or that decodes to nothing (`""` or a bare
-  `"whsec_"`), is rejected with `{:error, :invalid_signing_secret}` rather than
-  used as an empty HMAC key.
+  A secret that is not base64 is rejected with
+  `{:error, :invalid_signing_secret}`. One that decodes to fewer than 24 bytes -
+  including `""` and a bare `"whsec_"` - is rejected with
+  `{:error, :signing_secret_too_short}` rather than used as a weak HMAC key.
 
   ## Options
 
@@ -72,7 +78,7 @@ defmodule Granola.Webhooks.Signature do
 
   ## Examples
 
-      iex> secret = "whsec_" <> Base.encode64("hunter2")
+      iex> secret = "whsec_MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw"
       iex> {:ok, signature} = Granola.Webhooks.Signature.sign("{}", "evt_1", 1_769_527_800, secret)
       iex> headers = %{
       ...>   "webhook-id" => "evt_1",
@@ -110,13 +116,13 @@ defmodule Granola.Webhooks.Signature do
 
   ## Examples
 
-      iex> secret = "whsec_" <> Base.encode64("hunter2")
+      iex> secret = "whsec_MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw"
       iex> Granola.Webhooks.Signature.sign("{}", "evt_1", 1_769_527_800, secret)
-      {:ok, "v1,GXCeJ0pLjnq8b4SlDWlIt9f2VRZsVWGlQrrSy7TKTuo="}
+      {:ok, "v1,nmzTYcVLdIYwxBjv4WJXn54oII+ikTltQY2eCNb2+lY="}
 
   """
   @spec sign(binary(), binary(), binary() | integer(), binary()) ::
-          {:ok, binary()} | {:error, :invalid_signing_secret}
+          {:ok, binary()} | {:error, :invalid_signing_secret | :signing_secret_too_short}
   def sign(raw_body, id, timestamp, signing_secret)
       when is_binary(raw_body) and is_binary(id) and is_binary(signing_secret) and
              (is_binary(timestamp) or is_integer(timestamp)) do
@@ -147,15 +153,16 @@ defmodule Granola.Webhooks.Signature do
 
   defp secure_compare(_left, _right), do: false
 
-  # An empty key is rejected rather than used. HMAC accepts one and returns a
-  # perfectly valid signature, so a secret of "" or "whsec_" would verify
-  # deliveries that anyone could forge.
+  # A short key is rejected rather than used. HMAC accepts any key, including a
+  # zero-length one, and returns a perfectly valid signature - so a secret of
+  # "" or "whsec_" would verify deliveries that anyone could forge.
   defp decode_secret(signing_secret) do
     stripped = String.replace_prefix(signing_secret, @secret_prefix, "")
 
     case decode64(stripped) do
-      {:ok, key} when byte_size(key) > 0 -> {:ok, key}
-      _other -> {:error, :invalid_signing_secret}
+      {:ok, key} when byte_size(key) >= @min_secret_bytes -> {:ok, key}
+      {:ok, _short} -> {:error, :signing_secret_too_short}
+      :error -> {:error, :invalid_signing_secret}
     end
   end
 
