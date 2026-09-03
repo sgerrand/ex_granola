@@ -78,7 +78,7 @@ defmodule Granola.Webhooks.Signature do
 
   ## Examples
 
-      iex> secret = "whsec_MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw"
+      iex> secret = "whsec_" <> Base.encode64("granola-example-signing-key")
       iex> {:ok, signature} = Granola.Webhooks.Signature.sign("{}", "evt_1", 1_769_527_800, secret)
       iex> headers = %{
       ...>   "webhook-id" => "evt_1",
@@ -116,9 +116,9 @@ defmodule Granola.Webhooks.Signature do
 
   ## Examples
 
-      iex> secret = "whsec_MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw"
+      iex> secret = "whsec_" <> Base.encode64("granola-example-signing-key")
       iex> Granola.Webhooks.Signature.sign("{}", "evt_1", 1_769_527_800, secret)
-      {:ok, "v1,nmzTYcVLdIYwxBjv4WJXn54oII+ikTltQY2eCNb2+lY="}
+      {:ok, "v1,r0C+3jxrS8rBCZRpoPvf1nnKyvbDHGFlRY4w3tpd4m0="}
 
   """
   @spec sign(binary(), binary(), binary() | integer(), binary()) ::
