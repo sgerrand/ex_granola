@@ -183,6 +183,14 @@ defmodule Granola.AuditTest do
       assert [%{"id" => "aud_aaaaaaaaaaaaaa"}] = Granola.Audit.stream(client) |> Enum.to_list()
     end
 
+    test "raises when a page has no events key", %{client: client} do
+      Req.Test.stub(__MODULE__, fn conn ->
+        Req.Test.json(conn, %{"hasMore" => false, "cursor" => nil})
+      end)
+
+      assert_raise KeyError, fn -> Granola.Audit.stream(client) |> Enum.to_list() end
+    end
+
     test "raises on transport error during iteration", %{client: client} do
       Req.Test.stub(__MODULE__, fn conn ->
         Req.Test.transport_error(conn, :econnrefused)
