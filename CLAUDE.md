@@ -22,7 +22,7 @@ Elixir HTTP client library for the [Granola API](https://docs.granola.ai/introdu
 **Module layout:**
 
 - `lib/granola.ex` — `new/1` entry point, delegates to `Granola.Client`
-- `lib/granola/client.ex` — `%Granola.Client{}` struct; wraps `Req.new/1` with base URL, bearer auth, and atom-key JSON decoding
+- `lib/granola/client.ex` — `%Granola.Client{}` struct; wraps `Req.new/1` with base URL, bearer auth, and atom-key JSON decoding via `decoders: [json: &Jason.decode(&1, keys: :atoms)]`
 - `lib/granola/notes.ex` — `list/2`, `get/3`, `stream/2`
 - `lib/granola/folders.ex` — `list/2`, `stream/1`
 - `lib/granola/webhook_endpoints.ex` — `create/2`, `list/1`, `update/3`, `delete/2`
@@ -30,7 +30,7 @@ Elixir HTTP client library for the [Granola API](https://docs.granola.ai/introdu
 - `lib/granola/webhooks/signature.ex` — Standard Webhooks HMAC-SHA256 verification (`verify/4`, `sign/4`); no HTTP, no `Client`
 - `lib/granola/webhooks/event.ex` — `%Granola.Webhooks.Event{}`; decodes delivery payloads with **string** keys (never atoms — payloads are remote input)
 
-**HTTP layer:** Uses [`req`](https://hexdocs.pm/req) (~> 0.5). `plug` is a test-only dependency required by `Req.Test`.
+**HTTP layer:** Uses [`req`](https://hexdocs.pm/req) (~> 0.7). The floor is 0.7 for two reasons: `:decoders` (used in `client.ex`) only exists from 0.6.0, and every release up to and including 0.6.0 is affected by GHSA-655f-mp8p-96gv. `jason` is a direct dependency because the decoder calls it — do not rely on `req` pulling it in, since `req` 0.8 drops it. `plug` is a test-only dependency required by `Req.Test`.
 
 **Testing:** Tests use `Req.Test` stubs (no real HTTP). Pass `plug: {Req.Test, __MODULE__}` in `Granola.new/1` to wire the stub. JSON fixtures live in `test/support/fixtures/`.
 
