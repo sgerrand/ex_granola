@@ -30,7 +30,7 @@ Elixir HTTP client library for the [Granola API](https://docs.granola.ai/introdu
 - `lib/granola/webhooks.ex` — receiving side: `verify_and_parse/4`, `verify/4`, `parse/1`, `event_types/0`
 - `lib/granola/webhooks/signature.ex` — Standard Webhooks HMAC-SHA256 verification (`verify/4`, `sign/4`); no HTTP, no `Client`
 - `lib/granola/webhooks/event.ex` — `%Granola.Webhooks.Event{}`; decodes delivery payloads with **string** keys (never atoms — payloads are remote input)
-- `lib/granola/paginator.ex` — shared cursor pagination behind every `stream/2`
+- `lib/granola/paginator.ex` — shared cursor pagination behind every `stream/2`; `Notes`, `Folders` and `Audit` all delegate to it
 
 **HTTP layer:** Uses [`req`](https://hexdocs.pm/req) (~> 0.7). The floor is 0.7 for two reasons: `:decoders` (used in `client.ex`) only exists from 0.6.0, and every release up to and including 0.6.0 is affected by GHSA-655f-mp8p-96gv. `jason` is a direct dependency because the decoder calls it — do not rely on `req` pulling it in, since `req` 0.8 drops it. `plug` is a test-only dependency required by `Req.Test`.
 

@@ -7,6 +7,7 @@ defmodule Granola.Folders do
   """
 
   alias Granola.Client
+  alias Granola.Paginator
 
   @doc """
   Lists folders visible to the authenticated API key.
@@ -46,28 +47,6 @@ defmodule Granola.Folders do
   """
   @spec stream(Client.t()) :: Enumerable.t()
   def stream(%Client{} = client) do
-    Stream.resource(
-      fn -> nil end,
-      fn
-        :done ->
-          {:halt, :done}
-
-        cursor ->
-          params = if cursor, do: [cursor: cursor], else: []
-
-          case list(client, params) do
-            {:ok, %{folders: folders, hasMore: true, cursor: next_cursor}}
-            when is_binary(next_cursor) ->
-              {folders, next_cursor}
-
-            {:ok, %{folders: folders}} ->
-              {folders, :done}
-
-            {:error, _reason} = error ->
-              throw(error)
-          end
-      end,
-      fn _state -> :ok end
-    )
+    Paginator.stream(:folders, fn page_opts -> list(client, page_opts) end)
   end
 end
