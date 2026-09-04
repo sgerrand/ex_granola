@@ -1,0 +1,31 @@
+{
+  "webhook_endpoints": [
+    {
+      "id": "whe_2mKr8fQxLp7Ta3",
+      "object": "webhook_endpoint",
+      "url": "https://example.com/granola-webhooks",
+      "url_redacted": false,
+      "events": ["note.generated"],
+      "folder_ids": ["fol_4y6LduVdwSKC27"],
+      "scopes": ["personal"],
+      "created_by": {
+        "name": "Oat Benson",
+        "email": "oat@granola.ai"
+      },
+      "enabled": true,
+      "created_at": "2026-01-27T15:30:00Z"
+    },
+    {
+      "id": "whe_9pQw3rTyUiOp5L",
+      "object": "webhook_endpoint",
+      "url": "https://hooks.example.org",
+      "url_redacted": true,
+      "events": ["note.access_granted", "note.edited", "note.generated"],
+      "folder_ids": [],
+      "scopes": ["workspace"],
+      "created_by": null,
+      "enabled": false,
+      "created_at": "2026-01-20T09:00:00Z"
+    }
+  ]
+}
