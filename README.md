@@ -231,6 +231,7 @@ you can test your handler without a live delivery.
 to what's there. If you didn't create an endpoint you can only change
 `:enabled`, and its `url` comes back cut down to the origin with
 `url_redacted: true`.
+
 ### Audit log
 
 `Granola.Audit` reads the workspace audit log. This is an Enterprise feature
