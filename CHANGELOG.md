@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0](https://github.com/sgerrand/ex_granola/compare/v1.0.4...v1.1.0) (2026-09-07)
+
+
+### Features
+
+* **audit:** add Granola.Audit for the workspace audit log ([#32](https://github.com/sgerrand/ex_granola/issues/32)) ([af0c952](https://github.com/sgerrand/ex_granola/commit/af0c9524efd5365e7c2270ee779efb0c81e7795c))
+* support the Granola Webhooks API ([#33](https://github.com/sgerrand/ex_granola/issues/33)) ([bee50a7](https://github.com/sgerrand/ex_granola/commit/bee50a732cb748e621a9b9c3fccdc9845eada462))
+
+
+### Bug Fixes
+
+* **deps:** bump req from 0.7.3 to 0.7.4 ([#37](https://github.com/sgerrand/ex_granola/issues/37)) ([a81229c](https://github.com/sgerrand/ex_granola/commit/a81229cb853ab71c51a6c76611b8a53f8fc0ad02))
+* silence Req deprecation and stop Notes.stream/2 looping ([#34](https://github.com/sgerrand/ex_granola/issues/34)) ([4231600](https://github.com/sgerrand/ex_granola/commit/4231600221c3027fe3cbf6787ade70746b05bcb7))
+
 ## [1.0.4](https://github.com/sgerrand/ex_granola/compare/v1.0.3...v1.0.4) (2026-09-03)
 
 
