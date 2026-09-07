@@ -2,8 +2,15 @@ defmodule Granola.Client do
   @moduledoc """
   Holds configuration for the Granola API client.
 
-  Create one with `Granola.new/1` and pass it to functions in `Granola.Notes`
-  or `Granola.Audit`.
+  Create one with `Granola.new/1` and pass it to any function that talks to the
+  API: `Granola.Notes`, `Granola.Folders`, `Granola.WebhookEndpoints` and
+  `Granola.Audit`.
+
+  `Granola.Webhooks` and its submodules work on delivery payloads rather than
+  the API, so they take no client.
+
+  The audit log uses its own API key, so it needs its own client. See
+  `Granola.Audit`.
   """
 
   @base_url "https://public-api.granola.ai/v1"
