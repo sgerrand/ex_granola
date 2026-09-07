@@ -62,6 +62,12 @@ defmodule Granola.WebhooksTest do
     test "delegates to the signature module" do
       assert Webhooks.verify(@body, headers(), @secret, now: @timestamp) == :ok
     end
+
+    test "applies the default tolerance when called without options" do
+      # The fixture timestamp is fixed in the past, so the default 300 second
+      # tolerance rejects it against the real clock.
+      assert Webhooks.verify(@body, headers(), @secret) == {:error, :timestamp_too_old}
+    end
   end
 
   describe "parse/1" do

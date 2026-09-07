@@ -22,13 +22,15 @@ Elixir HTTP client library for the [Granola API](https://docs.granola.ai/introdu
 **Module layout:**
 
 - `lib/granola.ex` — `new/1` entry point, delegates to `Granola.Client`
-- `lib/granola/client.ex` — `%Granola.Client{}` struct; wraps `Req.new/1` with base URL, bearer auth, and atom-key JSON decoding via `decoders: [json: &Jason.decode(&1, keys: :atoms)]`
+- `lib/granola/client.ex` — `%Granola.Client{}` struct; wraps `Req.new/1` with base URL, bearer auth, and JSON decoding via `decoders: [json: &Jason.decode(&1, keys: keys)]`, where `keys` comes from the `:keys` option (`:atoms` default, `:strings` for open-ended payloads like audit events — atoms are never garbage collected)
 - `lib/granola/notes.ex` — `list/2`, `get/3`, `stream/2`
+- `lib/granola/audit.ex` — `list/2`, `stream/2` for the workspace audit log (Enterprise, separate API key)
 - `lib/granola/folders.ex` — `list/2`, `stream/1`
 - `lib/granola/webhook_endpoints.ex` — `create/2`, `list/1`, `update/3`, `delete/2`
 - `lib/granola/webhooks.ex` — receiving side: `verify_and_parse/4`, `verify/4`, `parse/1`, `event_types/0`
 - `lib/granola/webhooks/signature.ex` — Standard Webhooks HMAC-SHA256 verification (`verify/4`, `sign/4`); no HTTP, no `Client`
 - `lib/granola/webhooks/event.ex` — `%Granola.Webhooks.Event{}`; decodes delivery payloads with **string** keys (never atoms — payloads are remote input)
+- `lib/granola/paginator.ex` — shared cursor pagination behind every `stream/2`; `Notes`, `Folders` and `Audit` all delegate to it
 
 **HTTP layer:** Uses [`req`](https://hexdocs.pm/req) (~> 0.7). The floor is 0.7 for two reasons: `:decoders` (used in `client.ex`) only exists from 0.6.0, and every release up to and including 0.6.0 is affected by GHSA-655f-mp8p-96gv. `jason` is a direct dependency because the decoder calls it — do not rely on `req` pulling it in, since `req` 0.8 drops it. `plug` is a test-only dependency required by `Req.Test`.
 
@@ -38,6 +40,7 @@ Elixir HTTP client library for the [Granola API](https://docs.granola.ai/introdu
 
 - `GET /v1/notes` — list notes with optional `created_before`, `created_after`, `updated_after`, `cursor`, `page_size` filters
 - `GET /v1/notes/{note_id}` — get a single note; pass `include: :transcript` for full transcript
+- `GET /v1/audit` — list audit events with optional `action`, `occurred_before`, `occurred_after`, `cursor`, `page_size` filters; ordered by `collected_at` newest first
 - `stream/2` — lazy `Stream` that auto-paginates via cursor
 - `GET /v1/folders` — list folders with optional `cursor`, `page_size`
 - `POST /v1/webhook-endpoints` — returns **201**; `signing_secret` is returned once only

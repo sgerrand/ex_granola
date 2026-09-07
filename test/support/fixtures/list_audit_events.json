@@ -1,0 +1,26 @@
+{
+  "events": [
+    {
+      "id": "aud_7Kq2mXbT9vRp3L",
+      "object": "audit_event",
+      "action": "workspace.member_added",
+      "occurred_at": "2026-01-27T15:30:00.482Z",
+      "collected_at": "2026-01-27T15:30:04.109733Z",
+      "actor": {
+        "object": "user",
+        "id": "usr_3nQ8vLpZ2kR7dY",
+        "email": "oat@granola.ai"
+      },
+      "data": {
+        "role": "member"
+      },
+      "context": {
+        "ip_address": "203.0.113.42",
+        "user_agent": "Granola/7.400.0 (macOS 15.3)",
+        "client_version": "7.400.0"
+      }
+    }
+  ],
+  "hasMore": false,
+  "cursor": null
+}

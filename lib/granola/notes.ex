@@ -4,6 +4,7 @@ defmodule Granola.Notes do
   """
 
   alias Granola.Client
+  alias Granola.Paginator
 
   @doc """
   Lists notes for the authenticated workspace.
@@ -83,28 +84,8 @@ defmodule Granola.Notes do
   def stream(%Client{} = client, opts \\ []) do
     base_opts = Keyword.drop(opts, [:cursor, :page_size])
 
-    Stream.resource(
-      fn -> nil end,
-      fn
-        :done ->
-          {:halt, :done}
-
-        cursor ->
-          params = if cursor, do: Keyword.put(base_opts, :cursor, cursor), else: base_opts
-
-          case list(client, params) do
-            {:ok, %{notes: notes, hasMore: true, cursor: next_cursor}}
-            when is_binary(next_cursor) ->
-              {notes, next_cursor}
-
-            {:ok, %{notes: notes}} ->
-              {notes, :done}
-
-            {:error, _} = err ->
-              throw(err)
-          end
-      end,
-      fn _ -> :ok end
-    )
+    Paginator.stream(:notes, fn page_opts ->
+      list(client, Keyword.merge(base_opts, page_opts))
+    end)
   end
 end

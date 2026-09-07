@@ -65,6 +65,28 @@ defmodule Granola.Webhooks.SignatureTest do
       assert verify(pairs) == :ok
     end
 
+    test "accepts atom header names" do
+      assert verify(%{
+               :"webhook-id" => @id,
+               :"WEBHOOK-TIMESTAMP" => to_string(@timestamp),
+               "webhook-signature" => headers()["webhook-signature"]
+             }) == :ok
+    end
+
+    test "skips header pairs whose name is neither a string nor an atom" do
+      pairs = [{123, "ignored"} | Enum.to_list(headers())]
+      assert verify(pairs) == :ok
+    end
+
+    test "skips header entries that are not name/value pairs" do
+      pairs = [:junk | Enum.to_list(headers())]
+      assert verify(pairs) == :ok
+    end
+
+    test "treats a header value that is neither a string nor a list as missing" do
+      assert verify(headers(%{"webhook-id" => 123})) == {:error, :missing_id}
+    end
+
     test "accepts a header carrying several signatures" do
       combined =
         "v1,bm90LXRoZS1yaWdodC1zaWduYXR1cmUtYXQtYWxsLi4uLg== " <> headers()["webhook-signature"]
